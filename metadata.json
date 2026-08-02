@@ -1,0 +1,6 @@
+{
+  "name": "বিসমিল্লাহ অটো চার্জিং গ্যারেজ - Cloud SaaS Platform",
+  "description": "Ababil Software Solutions - Enterprise Multi-Tenant SaaS Platform for Garages, Stands, Samity & Organizations",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

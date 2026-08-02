@@ -1,0 +1,508 @@
+{
+  "entities": {
+    "SuperAdminConfig": {
+      "title": "Super Admin Configuration",
+      "description": "Global SaaS platform settings, branding defaults, and software owner details",
+      "type": "object",
+      "properties": {
+        "softwareName": { "type": "string", "description": "Global software name" },
+        "companyName": { "type": "string", "description": "Organization/Company name" },
+        "softwareOwner": { "type": "string", "description": "Ababil Software Solutions" },
+        "founderName": { "type": "string", "description": "Engineer Md. Tanveen Ahmed Tutul" },
+        "logoUrl": { "type": "string", "description": "URL to platform logo" },
+        "themeColor": { "type": "string", "description": "Primary theme color hex code" },
+        "supportPhone": { "type": "string", "description": "Owner support phone" },
+        "supportEmail": { "type": "string", "description": "Owner support email" },
+        "maintenanceMode": { "type": "boolean", "description": "Platform global lock state" }
+      },
+      "required": ["softwareName", "softwareOwner", "founderName"]
+    },
+    "Organization": {
+      "title": "Organization / Tenant",
+      "description": "Isolated subscriber organization unit (Garage, Stand, Samity, Hostel, etc.)",
+      "type": "object",
+      "properties": {
+        "orgId": { "type": "string", "description": "Unique tenant identifier" },
+        "orgName": { "type": "string", "description": "Organization name (e.g., বিসমিল্লাহ অটো চার্জিং গ্যারেজ)" },
+        "orgType": { "type": "string", "description": "Type: Auto Garage, Stand, Rickshaw, CNG, Samity, Mosque, etc." },
+        "address": { "type": "string", "description": "Physical address" },
+        "phone": { "type": "string", "description": "Contact phone number" },
+        "email": { "type": "string", "description": "Contact email" },
+        "logoUrl": { "type": "string", "description": "Custom organization logo" },
+        "themeColor": { "type": "string", "description": "Custom organization accent color" },
+        "packageId": { "type": "string", "description": "Current subscription package ID" },
+        "status": { "type": "string", "enum": ["active", "trial", "suspended", "expired"] },
+        "subscriptionStart": { "type": "string", "format": "date-time" },
+        "subscriptionEnd": { "type": "string", "format": "date-time" },
+        "maxMembers": { "type": "number", "description": "Allowed member cap" },
+        "maxEmployees": { "type": "number", "description": "Allowed employee cap" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["orgId", "orgName", "orgType", "packageId", "status"]
+    },
+    "Package": {
+      "title": "Subscription Package",
+      "description": "SaaS pricing tier (Starter, Professional, Business, Enterprise)",
+      "type": "object",
+      "properties": {
+        "packageId": { "type": "string", "description": "Unique package ID" },
+        "packageName": { "type": "string", "description": "Package tier name in Bengali" },
+        "priceMonthly": { "type": "number", "description": "Monthly price in BDT" },
+        "priceYearly": { "type": "number", "description": "Yearly price in BDT" },
+        "maxMembersAllowed": { "type": "number", "description": "Member limit" },
+        "maxEmployeesAllowed": { "type": "number", "description": "Employee limit" },
+        "features": { "type": "array", "description": "List of active feature codes" },
+        "isTrialAllowed": { "type": "boolean", "description": "Allows 7-day or 14-day free trial" }
+      },
+      "required": ["packageId", "packageName", "priceMonthly", "priceYearly"]
+    },
+    "User": {
+      "title": "User Account",
+      "description": "System user with Role-Based Access Control (RBAC)",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth User ID" },
+        "email": { "type": "string", "description": "User email address" },
+        "displayName": { "type": "string", "description": "Full name in Bengali" },
+        "phone": { "type": "string", "description": "Phone number" },
+        "role": { "type": "string", "enum": ["super_admin", "org_admin", "employee", "member"] },
+        "tenantId": { "type": "string", "description": "Organization tenant reference" },
+        "status": { "type": "string", "enum": ["active", "inactive"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "role", "tenantId"]
+    },
+    "Member": {
+      "title": "Organization Member / Client",
+      "description": "Registered driver, vehicle owner, or member in garage/stand",
+      "type": "object",
+      "properties": {
+        "memberId": { "type": "string", "description": "Unique member ID" },
+        "tenantId": { "type": "string", "description": "Tenant isolation ID" },
+        "memberName": { "type": "string", "description": "Driver / Member full name" },
+        "phone": { "type": "string", "description": "Contact phone" },
+        "vehicleNo": { "type": "string", "description": "Vehicle or Serial/Unit No" },
+        "vehicleType": { "type": "string", "description": "Auto Rickshaw, Easybike, CNG, Truck, etc." },
+        "address": { "type": "string", "description": "Residential address" },
+        "monthlyFee": { "type": "number", "description": "Agreed monthly charging/stand fee" },
+        "balance": { "type": "number", "description": "Advance paid balance" },
+        "dueAmount": { "type": "number", "description": "Current due amount" },
+        "qrCodeData": { "type": "string", "description": "QR Code string for instant scanning" },
+        "status": { "type": "string", "enum": ["active", "inactive"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["memberId", "tenantId", "memberName", "phone"]
+    },
+    "DailyCollection": {
+      "title": "Daily Collection Record",
+      "description": "Daily garage charging, stand entry, or membership transaction",
+      "type": "object",
+      "properties": {
+        "collectionId": { "type": "string", "description": "Unique transaction ID" },
+        "tenantId": { "type": "string", "description": "Tenant isolation ID" },
+        "memberId": { "type": "string", "description": "Member reference ID" },
+        "memberName": { "type": "string", "description": "Cached member name" },
+        "amount": { "type": "number", "description": "Collected amount in BDT" },
+        "paymentMethod": { "type": "string", "description": "Cash, bKash, Nagad, Bank" },
+        "receiptNo": { "type": "string", "description": "Auto-generated Bengali receipt voucher number" },
+        "category": { "type": "string", "description": "Charging Fee, Night Guard Fee, Washing, Due Payment" },
+        "collectorUid": { "type": "string", "description": "Employee UID who collected money" },
+        "collectorName": { "type": "string", "description": "Employee name" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["collectionId", "tenantId", "memberId", "amount", "receiptNo"]
+    },
+    "AuditLog": {
+      "title": "System Audit Log",
+      "description": "Immutable activity log for security tracking",
+      "type": "object",
+      "properties": {
+        "logId": { "type": "string", "description": "Unique log entry ID" },
+        "tenantId": { "type": "string", "description": "Tenant isolation ID or 'GLOBAL'" },
+        "action": { "type": "string", "description": "Action performed (e.g. Org Created, Fee Collected, Subscription Renewed)" },
+        "performedByUid": { "type": "string", "description": "User UID" },
+        "performedByName": { "type": "string", "description": "User display name" },
+        "ipAddress": { "type": "string", "description": "User IP" },
+        "details": { "type": "string", "description": "Additional JSON or string detail" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["logId", "action", "performedByUid", "timestamp"]
+    },
+    "Receipt": {
+      "title": "Receipt Voucher",
+      "description": "Auto generated printable receipt document",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "receiptNo": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "tenantName": { "type": "string" },
+        "memberId": { "type": "string" },
+        "memberName": { "type": "string" },
+        "memberPhone": { "type": "string" },
+        "membershipNumber": { "type": "string" },
+        "vehicleNo": { "type": "string" },
+        "chargingSlot": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "collectorName": { "type": "string" },
+        "paymentMethod": { "type": "string" },
+        "amount": { "type": "number" },
+        "due": { "type": "number" },
+        "advance": { "type": "number" },
+        "remarks": { "type": "string" },
+        "qrCodeData": { "type": "string" },
+        "barcode": { "type": "string" },
+        "isReprint": { "type": "boolean" },
+        "reprintCount": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "receiptNo", "tenantId", "memberId", "amount"]
+    },
+    "ReceiptTemplate": {
+      "title": "Receipt Print Template",
+      "description": "Customizable thermal and A4 print options",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "orgName": { "type": "string" },
+        "logoUrl": { "type": "string" },
+        "headerText": { "type": "string" },
+        "footerNote": { "type": "string" },
+        "termsAndConditions": { "type": "string" },
+        "showQrCode": { "type": "boolean" },
+        "showBarcode": { "type": "boolean" },
+        "showDigitalSignature": { "type": "boolean" },
+        "defaultPaperSize": { "type": "string", "enum": ["58mm", "80mm", "a4"] },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "tenantId"]
+    },
+    "Invoice": {
+      "title": "Invoice Record",
+      "description": "Monthly, Due, or Advance invoice bill statement",
+      "type": "object",
+      "properties": {
+        "invoiceNo": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "memberId": { "type": "string" },
+        "memberName": { "type": "string" },
+        "invoiceType": { "type": "string", "enum": ["monthly", "due", "advance", "reprint"] },
+        "monthYear": { "type": "string" },
+        "totalAmount": { "type": "number" },
+        "paidAmount": { "type": "number" },
+        "dueAmount": { "type": "number" },
+        "status": { "type": "string", "enum": ["paid", "partial", "unpaid"] },
+        "generatedDate": { "type": "string" },
+        "dueDate": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["invoiceNo", "tenantId", "memberId", "invoiceType", "totalAmount"]
+    },
+    "PrintLog": {
+      "title": "Print Audit Log",
+      "description": "Audit trail of print and PDF download events",
+      "type": "object",
+      "properties": {
+        "logId": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "documentType": { "type": "string", "enum": ["receipt", "invoice"] },
+        "documentNo": { "type": "string" },
+        "action": { "type": "string", "enum": ["print_58mm", "print_80mm", "print_a4", "pdf_download", "reprint"] },
+        "printedBy": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["logId", "tenantId", "documentNo", "action", "printedBy"]
+    },
+    "SmsLog": {
+      "title": "SMS Log",
+      "description": "Audit log for sent SMS messages",
+      "type": "object",
+      "properties": {
+        "logId": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "recipientPhone": { "type": "string" },
+        "recipientName": { "type": "string" },
+        "message": { "type": "string" },
+        "gateway": { "type": "string" },
+        "status": { "type": "string", "enum": ["delivered", "failed", "pending", "simulated"] },
+        "smsCount": { "type": "number" },
+        "cost": { "type": "number" },
+        "eventType": { "type": "string" },
+        "sentBy": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["logId", "tenantId", "recipientPhone", "message", "status"]
+    },
+    "NotificationLog": {
+      "title": "Notification Log",
+      "description": "In-app and system notification inbox record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "body": { "type": "string" },
+        "category": { "type": "string", "enum": ["system", "dashboard", "due", "subscription", "payment_success", "payment_failed"] },
+        "isRead": { "type": "boolean" },
+        "isArchived": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "tenantId", "title", "body", "category"]
+    },
+    "MessageTemplate": {
+      "title": "Message Template",
+      "description": "Reusable SMS and Push template with placeholders",
+      "type": "object",
+      "properties": {
+        "templateId": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "channel": { "type": "string", "enum": ["sms", "push", "whatsapp", "email"] },
+        "body": { "type": "string" },
+        "variables": { "type": "array" },
+        "isActive": { "type": "boolean" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["templateId", "tenantId", "title", "body", "channel"]
+    },
+    "PushNotification": {
+      "title": "Push Notification Broadcast",
+      "description": "Dashboard and system push alerts",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "category": { "type": "string", "enum": ["system", "dashboard", "due", "subscription", "payment_success", "payment_failed"] },
+        "targetAudience": { "type": "string", "enum": ["all", "members", "employees", "due_members"] },
+        "sentCount": { "type": "number" },
+        "status": { "type": "string", "enum": ["sent", "draft", "scheduled"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "tenantId", "title", "message", "category"]
+    },
+    "CommunicationSettings": {
+      "title": "Communication Gateway Settings",
+      "description": "Super Admin and Org level SMS gateway & notification options",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "smsEnabled": { "type": "boolean" },
+        "smsGateway": { "type": "string", "enum": ["teletalk", "greenweb", "bulksms_bd", "ssl_wireless", "twilio", "custom_api"] },
+        "apiKey": { "type": "string" },
+        "apiSecret": { "type": "string" },
+        "senderId": { "type": "string" },
+        "smsBalance": { "type": "number" },
+        "smsRate": { "type": "number" },
+        "autoSmsTriggers": { "type": "object" },
+        "pushEnabled": { "type": "boolean" },
+        "whatsappEnabled": { "type": "boolean" },
+        "emailEnabled": { "type": "boolean" },
+        "telegramEnabled": { "type": "boolean" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "tenantId", "smsGateway"]
+    },
+    "ApiKey": {
+      "title": "API Key",
+      "description": "REST API Key credentials for mobile apps and third-party integrations",
+      "type": "object",
+      "properties": {
+        "keyId": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "name": { "type": "string" },
+        "apiKey": { "type": "string" },
+        "role": { "type": "string" },
+        "scopes": { "type": "array" },
+        "rateLimitPerMin": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "revoked", "expired"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "lastUsedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["keyId", "tenantId", "name", "apiKey", "status"]
+    },
+    "ApiLog": {
+      "title": "API Request Log",
+      "description": "Realtime API request and response telemetry log",
+      "type": "object",
+      "properties": {
+        "logId": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "keyId": { "type": "string" },
+        "endpoint": { "type": "string" },
+        "version": { "type": "string" },
+        "method": { "type": "string" },
+        "clientIp": { "type": "string" },
+        "userAgent": { "type": "string" },
+        "statusCode": { "type": "number" },
+        "responseTimeMs": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["logId", "endpoint", "method", "statusCode", "timestamp"]
+    },
+    "ApiUsage": {
+      "title": "API Usage Telemetry",
+      "description": "Aggregated daily API usage statistics per endpoint",
+      "type": "object",
+      "properties": {
+        "usageId": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "endpoint": { "type": "string" },
+        "date": { "type": "string" },
+        "totalRequests": { "type": "number" },
+        "successRequests": { "type": "number" },
+        "failedRequests": { "type": "number" },
+        "avgLatencyMs": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["usageId", "tenantId", "endpoint", "date"]
+    },
+    "MobileSession": {
+      "title": "Mobile Active Session",
+      "description": "Active session for Android/iOS apps and TV screens",
+      "type": "object",
+      "properties": {
+        "sessionId": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "userId": { "type": "string" },
+        "deviceId": { "type": "string" },
+        "platform": { "type": "string", "enum": ["ANDROID", "IOS", "DESKTOP", "ANDROID_TV"] },
+        "appVersion": { "type": "string" },
+        "fcmToken": { "type": "string" },
+        "ipAddress": { "type": "string" },
+        "status": { "type": "string", "enum": ["ACTIVE", "EXPIRED", "REVOKED"] },
+        "lastActiveAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["sessionId", "tenantId", "userId", "deviceId", "platform"]
+    }
+  },
+  "firestore": {
+    "/receipts/{receiptId}": {
+      "schema": { "$ref": "#/entities/Receipt" },
+      "description": "Top level receipts"
+    },
+    "/receipt_templates/{templateId}": {
+      "schema": { "$ref": "#/entities/ReceiptTemplate" },
+      "description": "Receipt printing configuration templates"
+    },
+    "/invoice_history/{invoiceId}": {
+      "schema": { "$ref": "#/entities/Invoice" },
+      "description": "Monthly and due invoice statements"
+    },
+    "/print_logs/{logId}": {
+      "schema": { "$ref": "#/entities/PrintLog" },
+      "description": "Print and export audit trail"
+    },
+    "/system/branding": {
+      "schema": { "$ref": "#/entities/SuperAdminConfig" },
+      "description": "Global platform branding and owner credits"
+    },
+    "/packages/{packageId}": {
+      "schema": { "$ref": "#/entities/Package" },
+      "description": "Subscription tiers managed by Super Admin"
+    },
+    "/organizations/{orgId}": {
+      "schema": { "$ref": "#/entities/Organization" },
+      "description": "Multi-tenant organization master record"
+    },
+    "/organizations/{orgId}/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Users under an organization"
+    },
+    "/organizations/{orgId}/members/{memberId}": {
+      "schema": { "$ref": "#/entities/Member" },
+      "description": "Members, drivers, vehicle owners under an organization"
+    },
+    "/organizations/{orgId}/collections/{collectionId}": {
+      "schema": { "$ref": "#/entities/DailyCollection" },
+      "description": "Daily receipts and collection records"
+    },
+    "/organizations/{orgId}/receipts/{receiptId}": {
+      "schema": { "$ref": "#/entities/Receipt" },
+      "description": "Organization receipt records"
+    },
+    "/auditLogs/{logId}": {
+      "schema": { "$ref": "#/entities/AuditLog" },
+      "description": "Global and tenant audit logs for compliance"
+    },
+    "/sms_logs/{logId}": {
+      "schema": { "$ref": "#/entities/SmsLog" },
+      "description": "SMS log history"
+    },
+    "/notification_logs/{id}": {
+      "schema": { "$ref": "#/entities/NotificationLog" },
+      "description": "Notification center records"
+    },
+    "/message_templates/{templateId}": {
+      "schema": { "$ref": "#/entities/MessageTemplate" },
+      "description": "SMS and push templates"
+    },
+    "/push_notifications/{id}": {
+      "schema": { "$ref": "#/entities/PushNotification" },
+      "description": "Broadcast push notifications"
+    },
+    "/communication_settings/{id}": {
+      "schema": { "$ref": "#/entities/CommunicationSettings" },
+      "description": "Communication settings and SMS gateway config"
+    },
+    "/income/{id}": {
+      "description": "Organization Income Records"
+    },
+    "/expenses/{id}": {
+      "description": "Organization Expense Records"
+    },
+    "/cashbook/{id}": {
+      "description": "Daily cash in, cash out, and cashbook logs"
+    },
+    "/bank_accounts/{id}": {
+      "description": "Multiple bank accounts for organization"
+    },
+    "/bank_transactions/{id}": {
+      "description": "Bank deposits, withdrawals, and account transfers"
+    },
+    "/ledgers/{id}": {
+      "description": "Member, Employee, Cash, Bank, and Org General Ledgers"
+    },
+    "/financial_reports/{id}": {
+      "description": "Daily, Monthly, Yearly, P&L, and Balance Summaries"
+    },
+    "/income_categories/{id}": {
+      "description": "Custom income categories"
+    },
+    "/expense_categories/{id}": {
+      "description": "Custom expense categories with budget caps"
+    },
+    "/analytics/{id}": {
+      "description": "Aggregated analytics stats and metric snapshots"
+    },
+    "/report_cache/{id}": {
+      "description": "Cached computation documents for reports and exports"
+    },
+    "/dashboard_widgets/{id}": {
+      "description": "Custom widget layout and user preference settings"
+    },
+    "/api_keys/{keyId}": {
+      "schema": { "$ref": "#/entities/ApiKey" },
+      "description": "API key management credentials"
+    },
+    "/api_logs/{logId}": {
+      "schema": { "$ref": "#/entities/ApiLog" },
+      "description": "API call telemetry and request audit trail"
+    },
+    "/api_usage/{usageId}": {
+      "schema": { "$ref": "#/entities/ApiUsage" },
+      "description": "Daily endpoint usage and performance metrics"
+    },
+    "/mobile_sessions/{sessionId}": {
+      "schema": { "$ref": "#/entities/MobileSession" },
+      "description": "Active mobile app sessions and tokens"
+    }
+  }
+}
